@@ -1,17 +1,36 @@
 fun main() {
     fun part1(input: List<String>): Int {
-        return input.size
+        return input.sumOf {
+            10 * it.firstNotNullOf { it.digitToIntOrNull() } +
+                    it.reversed().firstNotNullOf { it.digitToIntOrNull() }
+        }
     }
 
     fun part2(input: List<String>): Int {
-        return input.size
+        val spelledDigits = listOf("one", "two", "three", "four", "five", "six", "seven", "eight", "nine")
+
+        fun String.spelledDigitToIntOrNullAt(startIndex: Int): Int? {
+            val substring = substring(startIndex)
+            return spelledDigits
+                .indexOfFirst { substring.startsWith(it) }
+                .takeUnless { it == -1 }
+                ?.plus(1)
+        }
+
+        return input.sumOf { line ->
+            line.indices
+                .mapNotNull { i -> line[i].digitToIntOrNull() ?: line.spelledDigitToIntOrNullAt(i) }
+                .let { 10 * it.first() + it.last() }
+        }
     }
 
-    // test if implementation meets criteria from the description, like:
     val testInput = readInput("Day01_test")
-    check(part1(testInput) == 1)
+    checkEquals(142, part1(testInput))
+
+    val test2Input = readInput("Day01_test2")
+    checkEquals(281, part2(test2Input))
 
     val input = readInput("Day01")
-    part1(input).println()
-    part2(input).println()
+    checkEquals(56042, part1(input))
+    checkEquals(55358, part2(input))
 }
